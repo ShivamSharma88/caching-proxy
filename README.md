@@ -167,10 +167,3 @@ The proxy handles various error scenarios:
 - **Configuration File**: Support reading configuration from a file
 - **REST API**: Add REST endpoints for cache management
 
-## License
-
-MIT License
-
-## Contributing
-
-Feel free to submit issues and enhancement requests!
