@@ -4,8 +4,9 @@ import org.apache.hc.client5.http.classic.methods.*;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +27,13 @@ public class HttpForwarder {
      */
     public static ForwardedResponse forward(String method, String url, Map<String, String> headers, byte[] body) {
         try {
-            ClassicHttpRequest request = createRequest(method, url, headers, body);
+            HttpRequest request = createRequest(method, url, headers, body);
             if (request == null) {
                 return null;
             }
 
             // Execute request
-            ClassicHttpResponse response = httpClient.executeOpen(null, request, null);
+            ClassicHttpResponse response = httpClient.executeOpen(null, (org.apache.hc.client5.http.classic.methods.ClassicHttpRequest) request, null);
 
             // Extract response data
             int statusCode = response.getCode();
@@ -52,8 +53,8 @@ public class HttpForwarder {
     /**
      * Create appropriate HTTP request based on method
      */
-    private static ClassicHttpRequest createRequest(String method, String url, Map<String, String> headers, byte[] body) {
-        ClassicHttpRequest request;
+    private static HttpRequest createRequest(String method, String url, Map<String, String> headers, byte[] body) {
+        org.apache.hc.client5.http.classic.methods.ClassicHttpRequest request;
 
         switch (method.toUpperCase()) {
             case "GET":
@@ -62,13 +63,13 @@ public class HttpForwarder {
             case "POST":
                 request = new HttpPost(url);
                 if (body != null && body.length > 0) {
-                    ((HttpPost) request).setEntity(new ByteArrayEntity(body));
+                    ((HttpPost) request).setEntity(new ByteArrayEntity(body, ContentType.APPLICATION_JSON));
                 }
                 break;
             case "PUT":
                 request = new HttpPut(url);
                 if (body != null && body.length > 0) {
-                    ((HttpPut) request).setEntity(new ByteArrayEntity(body));
+                    ((HttpPut) request).setEntity(new ByteArrayEntity(body, ContentType.APPLICATION_JSON));
                 }
                 break;
             case "DELETE":
@@ -77,7 +78,7 @@ public class HttpForwarder {
             case "PATCH":
                 request = new HttpPatch(url);
                 if (body != null && body.length > 0) {
-                    ((HttpPatch) request).setEntity(new ByteArrayEntity(body));
+                    ((HttpPatch) request).setEntity(new ByteArrayEntity(body, ContentType.APPLICATION_JSON));
                 }
                 break;
             case "HEAD":
@@ -128,7 +129,7 @@ public class HttpForwarder {
     /**
      * Extract body from response entity
      */
-    private static byte[] extractBody(HttpEntity entity) throws IOException {
+    private static byte[] extractBody(org.apache.hc.core5.http.HttpEntity entity) throws IOException {
         if (entity == null) {
             return new byte[0];
         }
