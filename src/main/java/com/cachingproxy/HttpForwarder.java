@@ -6,7 +6,6 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +26,13 @@ public class HttpForwarder {
      */
     public static ForwardedResponse forward(String method, String url, Map<String, String> headers, byte[] body) {
         try {
-            HttpRequest request = createRequest(method, url, headers, body);
+            HttpUriRequestBase request = createRequest(method, url, headers, body);
             if (request == null) {
                 return null;
             }
 
             // Execute request
-            ClassicHttpResponse response = httpClient.executeOpen(null, (org.apache.hc.client5.http.classic.methods.ClassicHttpRequest) request, null);
+            ClassicHttpResponse response = httpClient.executeOpen(null, request, null);
 
             // Extract response data
             int statusCode = response.getCode();
@@ -53,8 +52,8 @@ public class HttpForwarder {
     /**
      * Create appropriate HTTP request based on method
      */
-    private static HttpRequest createRequest(String method, String url, Map<String, String> headers, byte[] body) {
-        org.apache.hc.client5.http.classic.methods.ClassicHttpRequest request;
+    private static HttpUriRequestBase createRequest(String method, String url, Map<String, String> headers, byte[] body) {
+        HttpUriRequestBase request;
 
         switch (method.toUpperCase()) {
             case "GET":
